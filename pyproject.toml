@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.2", "setuptools_scm",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kaitai2WxHexEditor"
+authors = [{name = "KOLANICH"}]
+description = "A tool for creating WxHexEditor tags for a file based on Kaitai Struct spec or compiled python file"
+readme = "ReadMe.md"
+keywords = ["file format", "hex editor"]
+license = {text = "Unlicense"}
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Environment :: Other Environment",
+    "Intended Audience :: Developers",
+    "License :: Public Domain",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "plumbum", # @ git+https://github.com/tomerfiliba/plumbum.git
+    "kaitaistruct", # @ git+https://github.com/kaitai-io/kaitai_struct_python_runtime.git
+    "kaitaiStructCompile", # @ git+https://github.com/kaitaiStructCompile.py/kaitaiStructCompile.py.git
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/KOLANICH/kaitai2WxHexEditor"
+
+[project.scripts]
+kaitai2WxHexEditor = "kaitai2WxHexEditor:APPCLI.run"
+
+[tool.setuptools]
+zip-safe = true
+py-modules = ["kaitai2WxHexEditor"]
+include-package-data = true
+
+[tool.setuptools_scm]

@@ -1,0 +1,59 @@
+image: registry.gitlab.com/kaitaistructcompile.py/kaitai_struct_python_docker:latest
+
+stages:
+  - dependencies
+  - build
+  - test
+  - trigger
+
+variables:
+  DOCKER_DRIVER: overlay2
+  SAST_ANALYZER_IMAGE_TAG: latest
+  SAST_DISABLE_DIND: "true"
+
+include:
+  - template: SAST.gitlab-ci.yml
+  #- template: DAST.gitlab-ci.yml
+  #- template: License-Management.gitlab-ci.yml
+  #- template: Container-Scanning.gitlab-ci.yml
+  #- template: Dependency-Scanning.gitlab-ci.yml
+  - template: Code-Quality.gitlab-ci.yml
+
+
+build:
+  tags:
+    - shared
+  stage: build
+  variables:
+    GIT_DEPTH: "1"
+    PYTHONUSERBASE: ${CI_PROJECT_DIR}/python_user_packages
+
+  before_script:
+    - export PATH="$PATH:$PYTHONUSERBASE/bin" # don't move into `variables`
+
+  cache:
+    paths:
+      - $PYTHONUSERBASE
+      - tests/kaitai_struct_formats
+
+  script:
+    - python3 setup.py bdist_wheel
+    - pip3 install --upgrade --user --pre ./dist/*.whl
+    - mkdir ./wheels
+    - mv ./dist/*.whl ./wheels/kaitai2WxHexEditor-0.CI-py3-none-any.whl
+    - mkdir ./output
+    - zip ./output/test.zip kaitai2WxHexEditor.py ReadMe.md
+    - coverage run -a --source=kaitai2WxHexEditor -m kaitai2WxHexEditor zip ./output/test.zip
+    #- coverage run -a --source=kaitaiStructCompile ./test.py
+    - coverage report -m
+    - coverage xml
+
+  coverage: /^TOTAL(?:\s*\d+){4}\s(\d+%).+/
+
+  artifacts:
+    paths:
+      - wheels
+      - output
+
+    reports:
+      cobertura: ./coverage.xml
